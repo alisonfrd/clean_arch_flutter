@@ -3,9 +3,9 @@ import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'package:project/domain/usecases/usecases.dart';
+import 'package:project/domain/helpers/helpers.dart';
 
 import 'package:project/data/http/http.dart';
-
 import 'package:project/data/usecases/usecases.dart';
 
 class HttpClientSpy extends Mock implements HttpClient {}
@@ -33,5 +33,19 @@ void main() {
       method: 'post',
       body: {'email': params.email, 'password': params.secret},
     ));
+  });
+  test('Deve lançar um erro inexperado se o HttpClient retornar 400', () async {
+    when(httpClient.request(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            body: anyNamed('body')))
+        .thenThrow(HttpError.badRequest);
+    //ação
+    final params = AuthenticationParams(
+        email: faker.internet.email(), secret: faker.internet.password());
+    final future = sut.auth(params);
+
+    //expect
+    expect(future, throwsA(DomainError.unexpected));
   });
 }
