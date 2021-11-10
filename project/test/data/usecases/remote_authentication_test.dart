@@ -47,4 +47,31 @@ void main() {
     //expect
     expect(future, throwsA(DomainError.unexpected));
   });
+  test('Deve lançar um erro inexperado se o HttpClient retornar 404', () async {
+    when(httpClient.request(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            body: anyNamed('body')))
+        .thenThrow(HttpError.notFound);
+    //ação
+    final future = sut.auth(params);
+
+    //expect
+    expect(future, throwsA(DomainError.unexpected));
+  });
+
+  test(
+      'Deve lançar um erro InvalidCredencialError se o HttpClient retornar 401',
+      () async {
+    when(httpClient.request(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            body: anyNamed('body')))
+        .thenThrow(HttpError.unauthorized);
+    //ação
+    final future = sut.auth(params);
+
+    //expect
+    expect(future, throwsA(DomainError.invalidCredencial));
+  });
 }
