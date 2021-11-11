@@ -112,4 +112,21 @@ void main() {
     //expect
     expect(account.token, accessToken);
   });
+
+  test(
+      'Deve retornar um UnexpectedError se o HttpClient retornar 200 com campos inválidos',
+      () async {
+    when(httpClient.request(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            body: anyNamed('body')))
+        .thenAnswer((_) async => {
+              'invalid_token': 'invalid_token',
+            });
+    //ação
+    final future = sut.auth(params);
+
+    //expect
+    expect(future, throwsA(DomainError.unexpected));
+  });
 }
