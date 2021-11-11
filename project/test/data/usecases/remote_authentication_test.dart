@@ -27,6 +27,14 @@ void main() {
   });
   test('Garantir que será chamado o HttpClient com valores corretos', () async {
     //ação
+    when(httpClient.request(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            body: anyNamed('body')))
+        .thenAnswer((_) async => {
+              'accessToken': faker.guid.guid(),
+              'name': faker.person.name(),
+            });
     await sut.auth(params);
 
     //expect

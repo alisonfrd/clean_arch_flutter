@@ -19,7 +19,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   #pode gerar pelo dart sem usar o flutter
-  test:
+  test: 
   #duble
   mockito:
   #valores aleatorios
