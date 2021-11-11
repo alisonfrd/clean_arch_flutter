@@ -17,6 +17,25 @@ void main() {
   HttpClientSpy httpClient;
   AuthenticationParams params;
   String url;
+
+  Map mockValidData() => {
+        'accessToken': faker.guid.guid(),
+        'name': faker.person.name(),
+      };
+
+  PostExpectation mockRequest() => when(httpClient.request(
+      url: anyNamed('url'),
+      method: anyNamed('method'),
+      body: anyNamed('body')));
+
+  void mockHttpData(Map data) {
+    mockRequest().thenAnswer((_) async => data);
+  }
+
+  void mockHttpError(HttpError error) {
+    mockRequest().thenThrow(error);
+  }
+
   setUp(() {
     //arrange
     httpClient = HttpClientSpy();
@@ -24,17 +43,9 @@ void main() {
     sut = RemoteAuthentication(httpClient: httpClient, url: url);
     params = AuthenticationParams(
         email: faker.internet.email(), secret: faker.internet.password());
+    mockHttpData(mockValidData());
   });
   test('Garantir que será chamado o HttpClient com valores corretos', () async {
-    //ação
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenAnswer((_) async => {
-              'accessToken': faker.guid.guid(),
-              'name': faker.person.name(),
-            });
     await sut.auth(params);
 
     //expect
@@ -45,11 +56,7 @@ void main() {
     ));
   });
   test('Deve lançar um erro inexperado se o HttpClient retornar 400', () async {
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenThrow(HttpError.badRequest);
+    mockHttpError(HttpError.badRequest);
     //ação
     final future = sut.auth(params);
 
@@ -57,11 +64,7 @@ void main() {
     expect(future, throwsA(DomainError.unexpected));
   });
   test('Deve lançar um erro inexperado se o HttpClient retornar 404', () async {
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenThrow(HttpError.notFound);
+    mockHttpError(HttpError.notFound);
     //ação
     final future = sut.auth(params);
 
@@ -70,11 +73,7 @@ void main() {
   });
 
   test('Deve lançar um erro inexperado se o HttpClient retornar 500', () async {
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenThrow(HttpError.serverError);
+    mockHttpError(HttpError.serverError);
     //ação
     final future = sut.auth(params);
 
@@ -84,11 +83,7 @@ void main() {
   test(
       'Deve lançar um erro InvalidCredencialError se o HttpClient retornar 401',
       () async {
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenThrow(HttpError.unauthorized);
+    mockHttpError(HttpError.unauthorized);
     //ação
     final future = sut.auth(params);
 
@@ -97,32 +92,21 @@ void main() {
   });
 
   test('Deve retornar um Account se o HttpClient retornar 200', () async {
-    final accessToken = faker.guid.guid();
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenAnswer((_) async => {
-              'accessToken': accessToken,
-              'name': faker.person.name(),
-            });
+    final validData = mockValidData();
+    mockHttpData(validData);
     //ação
     final account = await sut.auth(params);
 
     //expect
-    expect(account.token, accessToken);
+    expect(account.token, validData['accessToken']);
   });
 
   test(
       'Deve retornar um UnexpectedError se o HttpClient retornar 200 com campos inválidos',
       () async {
-    when(httpClient.request(
-            url: anyNamed('url'),
-            method: anyNamed('method'),
-            body: anyNamed('body')))
-        .thenAnswer((_) async => {
-              'invalid_token': 'invalid_token',
-            });
+    mockHttpData({
+      'invalid_token': 'invalid_token',
+    });
     //ação
     final future = sut.auth(params);
 
