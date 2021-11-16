@@ -6,11 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:project/ui/pages/pages.dart';
 
 void main() {
-  testWidgets('deve carregar com o estado inicial correto',
-      (WidgetTester tester) async {
+  Future<void> loadTester(WidgetTester tester) async {
     final loginPage = MaterialApp(home: LoginPage());
     await tester.pumpWidget(loginPage);
+  }
 
+  testWidgets('deve carregar com o estado inicial correto',
+      (WidgetTester tester) async {
+    await loadTester(tester);
     final emailTextChildren = find.descendant(
         of: find.bySemanticsLabel('Email'), matching: find.byType(Text));
     expect(emailTextChildren, findsOneWidget,
