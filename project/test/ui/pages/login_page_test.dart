@@ -13,17 +13,22 @@ class LoginPresenterSpy extends Mock implements LoginPresenter {}
 void main() {
   LoginPresenter presenter;
   StreamController<String> emailErrorController;
+  StreamController<String> passwordErrorController;
   Future<void> loadTester(WidgetTester tester) async {
     presenter = LoginPresenterSpy();
     emailErrorController = StreamController<String>();
+    passwordErrorController = StreamController<String>();
     when(presenter.emailErrorStream)
         .thenAnswer((_) => emailErrorController.stream);
+    when(presenter.passwordErrorStream)
+        .thenAnswer((_) => passwordErrorController.stream);
     final loginPage = MaterialApp(home: LoginPage(presenter));
     await tester.pumpWidget(loginPage);
   }
 
   tearDown(() {
     emailErrorController.close();
+    passwordErrorController.close();
   });
 
   testWidgets('deve carregar com o estado inicial correto',
@@ -77,6 +82,59 @@ void main() {
     expect(
       find.descendant(
           of: find.bySemanticsLabel('Email'), matching: find.byType(Text)),
+      findsOneWidget,
+    );
+  });
+  testWidgets('não deve apresentar um erro se o email for válido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    emailErrorController.add('');
+    //renderiza os componentes
+    await tester.pump();
+
+    expect(
+      find.descendant(
+          of: find.bySemanticsLabel('Email'), matching: find.byType(Text)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('deve apresentar um erro se o senha for inválida',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    passwordErrorController.add('any error');
+    //renderiza os componentes
+    await tester.pump();
+    expect(find.text('any error'), findsOneWidget);
+  });
+
+  testWidgets('não deve apresentar um erro se o senha for válido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    passwordErrorController.add(null);
+    //renderiza os componentes
+    await tester.pump();
+
+    expect(
+      find.descendant(
+          of: find.bySemanticsLabel('Senha'), matching: find.byType(Text)),
+      findsOneWidget,
+    );
+  });
+  testWidgets('não deve apresentar um erro se o senha for válido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    passwordErrorController.add('');
+    //renderiza os componentes
+    await tester.pump();
+
+    expect(
+      find.descendant(
+          of: find.bySemanticsLabel('Senha'), matching: find.byType(Text)),
       findsOneWidget,
     );
   });
