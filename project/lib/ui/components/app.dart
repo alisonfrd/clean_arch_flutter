@@ -44,7 +44,7 @@ class App extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Play',
-      home: LoginPage(),
+      home: LoginPage(null),
     );
   }
 }
