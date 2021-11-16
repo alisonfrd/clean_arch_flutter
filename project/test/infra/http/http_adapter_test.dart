@@ -18,6 +18,14 @@ void main() {
     sut = HttpAdapter(client);
     url = faker.internet.httpUrl();
   });
+
+  group('shared', () {
+    test('deve lancar um ServerError se o metodo for invalido', () async {
+      final future = sut.request(url: url, method: 'invalid_method');
+
+      expect(future, throwsA(HttpError.serverError));
+    });
+  });
   group('post', () {
     PostExpectation mockRequest() => when(
         client.post(url, body: anyNamed('body'), headers: anyNamed('headers')));
