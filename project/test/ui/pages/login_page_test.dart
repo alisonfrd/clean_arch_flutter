@@ -65,4 +65,19 @@ void main() {
     await tester.pump();
     expect(find.text('any error'), findsOneWidget);
   });
+
+  testWidgets('não deve apresentar um erro se o email for válido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    emailErrorController.add(null);
+    //renderiza os componentes
+    await tester.pump();
+
+    expect(
+      find.descendant(
+          of: find.bySemanticsLabel('Email'), matching: find.byType(Text)),
+      findsOneWidget,
+    );
+  });
 }
