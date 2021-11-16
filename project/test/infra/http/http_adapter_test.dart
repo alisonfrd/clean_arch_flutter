@@ -88,6 +88,12 @@ void main() {
       expect(future, throwsA(HttpError.badRequest));
     });
 
+    test('deve retornar UnauthoziedError se o statusCode for 401', () async {
+      mockResponse(401);
+      final future = sut.request(url: url, method: 'post');
+
+      expect(future, throwsA(HttpError.unauthorized));
+    });
     test('deve retornar ServerError se o statusCode for 500', () async {
       mockResponse(500);
       final future = sut.request(url: url, method: 'post');
