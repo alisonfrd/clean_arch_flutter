@@ -94,6 +94,14 @@ void main() {
 
       expect(future, throwsA(HttpError.unauthorized));
     });
+
+    test('deve retornar ForbidenError se o statusCode for 403', () async {
+      mockResponse(403);
+      final future = sut.request(url: url, method: 'post');
+
+      expect(future, throwsA(HttpError.forbidden));
+    });
+
     test('deve retornar ServerError se o statusCode for 500', () async {
       mockResponse(500);
       final future = sut.request(url: url, method: 'post');
