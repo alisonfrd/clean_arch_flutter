@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:faker/faker.dart';
@@ -11,11 +12,19 @@ class LoginPresenterSpy extends Mock implements LoginPresenter {}
 
 void main() {
   LoginPresenter presenter;
+  StreamController<String> emailErrorController;
   Future<void> loadTester(WidgetTester tester) async {
     presenter = LoginPresenterSpy();
+    emailErrorController = StreamController<String>();
+    when(presenter.emailErrorStream)
+        .thenAnswer((_) => emailErrorController.stream);
     final loginPage = MaterialApp(home: LoginPage(presenter));
     await tester.pumpWidget(loginPage);
   }
+
+  tearDown(() {
+    emailErrorController.close();
+  });
 
   testWidgets('deve carregar com o estado inicial correto',
       (WidgetTester tester) async {
@@ -45,5 +54,15 @@ void main() {
     final password = faker.internet.password();
     await tester.enterText(find.bySemanticsLabel('Senha'), password);
     verify(presenter.validatePassword(password));
+  });
+
+  testWidgets('deve apresentar um erro se o email for inválido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    emailErrorController.add('any error');
+    //renderiza os componentes
+    await tester.pump();
+    expect(find.text('any error'), findsOneWidget);
   });
 }
