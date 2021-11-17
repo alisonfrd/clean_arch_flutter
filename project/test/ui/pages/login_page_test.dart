@@ -156,4 +156,16 @@ void main() {
     final button = tester.widget<RaisedButton>(find.byType(RaisedButton));
     expect(button.onPressed, isNotNull);
   });
+
+  testWidgets('deve desabilitar o botao se o formulario for invalido',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    isFormValidontroller.add(false);
+    //renderiza os componentes
+    await tester.pump();
+
+    final button = tester.widget<RaisedButton>(find.byType(RaisedButton));
+    expect(button.onPressed, null);
+  });
 }
