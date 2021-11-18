@@ -168,4 +168,15 @@ void main() {
     final button = tester.widget<RaisedButton>(find.byType(RaisedButton));
     expect(button.onPressed, null);
   });
+  testWidgets('deve chamar a autenticacao para submter um formulario',
+      (WidgetTester tester) async {
+    await loadTester(tester);
+
+    isFormValidontroller.add(true);
+    await tester.pump();
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pump();
+
+    verify(presenter.auth()).called(1);
+  });
 }
