@@ -205,4 +205,12 @@ void main() {
 
     expect(find.text('main error'), findsOneWidget);
   });
+
+  testWidgets('deve fecha as streams no dispose', (WidgetTester tester) async {
+    await loadTester(tester);
+
+    addTearDown(() {
+      verify(presenter.dispose()).called(1);
+    });
+  });
 }
